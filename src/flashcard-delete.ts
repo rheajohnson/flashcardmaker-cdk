@@ -1,5 +1,5 @@
+import AWS = require('aws-sdk');
 
-const AWS = require('aws-sdk');
 const db = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = process.env.TABLE_NAME || '';
 
@@ -11,11 +11,11 @@ export const handler = async (event: any = {}): Promise<any> => {
         return { statusCode: 400, body: `Error: You are missing the path parameter id` };
     }
 
-    const flashcardPutParams = {
+    const flashcardDeleteParams = {
         TableName: TABLE_NAME,
         Key: {
             pk: "sets",
-            sk: `set#${requestedSetId}#flashcard#${requestedFlashcardId}`
+            sk: `set#${requestedSetId}#flashcard${requestedFlashcardId}`,
         }
     };
 
@@ -25,13 +25,14 @@ export const handler = async (event: any = {}): Promise<any> => {
             pk: `sets`,
             sk: `metadata#set#${requestedSetId}`
         },
-        UpdateExpression: `set count = :count`,
-        ExpressionAttributeValues: { ":count": { "N": "1" } },
+        UpdateExpression: `add #count :count`,
+        ExpressionAttributeValues: { ":count": -1 },
+        ExpressionAttributeNames: { "#count": "count" },
         ReturnValues: 'UPDATED_NEW'
     }
 
     try {
-        await db.delete(flashcardPutParams).promise();
+        await db.delete(flashcardDeleteParams).promise();
         await db.update(setPutParams).promise();
         return { statusCode: 200, body: '' };
     } catch (dbError) {

@@ -1,5 +1,4 @@
-
-const AWS = require('aws-sdk');
+import AWS = require('aws-sdk');
 const db = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = process.env.TABLE_NAME || '';
 const PRIMARY_KEY = process.env.PRIMARY_KEY || 'pk';
@@ -15,7 +14,7 @@ export const handler = async (event: any = {}): Promise<any> => {
     const params = {
         TableName: TABLE_NAME,
         Key: {
-            [PRIMARY_KEY]: `set#${requestedSetId}#flashcard#${requestedFlashcardId}`
+            [PRIMARY_KEY]: `set#${requestedSetId}#flashcard${requestedFlashcardId}`,
         }
     };
 

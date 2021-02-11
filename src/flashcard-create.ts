@@ -1,6 +1,7 @@
-const AWS = require('aws-sdk');
+import AWS = require('aws-sdk');
+import { v4 as uuidv4 } from 'uuid';
+
 const db = new AWS.DynamoDB.DocumentClient();
-const uuidv4 = require('uuid/v4');
 const TABLE_NAME = process.env.TABLE_NAME || '';
 
 const RESERVED_RESPONSE = `Error: You're using AWS reserved keywords as attributes`,
@@ -26,9 +27,10 @@ export const handler = async (event: any = {}): Promise<any> => {
         TableName: TABLE_NAME,
         Item: {
             pk: 'sets',
-            sk: `metadata#set#${key}`,
+            sk: `set#${requestedSetId}#flashcard#${key}`,
             front: item.front || "",
             back: item.back || "",
+            id: key,
             created_on: date.getTime()
         }
     };
@@ -39,16 +41,20 @@ export const handler = async (event: any = {}): Promise<any> => {
             pk: `sets`,
             sk: `metadata#set#${requestedSetId}`
         },
-        UpdateExpression: `set count = :count`,
-        ExpressionAttributeValues: { ":count": { "N": "1" } },
+        UpdateExpression: 'add #count :count',
+        ExpressionAttributeNames: {
+            '#count': 'count'
+        },
+        ExpressionAttributeValues: { ":count": 1 },
         ReturnValues: 'UPDATED_NEW'
     }
 
     try {
         await db.put(flashcardPutParams).promise();
-        await db.put(setPutParams).promise();
-        return { statusCode: 201, body: '' };
+        await db.update(setPutParams).promise();
+        return { statusCode: 201, body: JSON.stringify({ id: key }) };
     } catch (dbError) {
+        console.error(dbError.message)
         const errorResponse = dbError.code === 'ValidationException' && dbError.message.includes('reserved keyword') ?
             DYNAMODB_EXECUTION_ERROR : RESERVED_RESPONSE;
         return { statusCode: 500, body: errorResponse };

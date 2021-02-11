@@ -1,7 +1,7 @@
 import { Cors, LambdaIntegration, MockIntegration, PassthroughBehavior, RestApi, IResource } from '@aws-cdk/aws-apigateway';
 import { AttributeType, Table, BillingMode } from '@aws-cdk/aws-dynamodb';
-import { Construct, RemovalPolicy, Stack, StackProps } from '@aws-cdk/core';
-import lambda = require('@aws-cdk/aws-lambda');
+import { Construct, RemovalPolicy, Stack, StackProps, Duration } from '@aws-cdk/core';
+import { Function, Runtime, AssetCode } from '@aws-cdk/aws-lambda';
 
 export class ApigCrudStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -31,46 +31,51 @@ export class ApigCrudStack extends Stack {
     });
 
     // sets resource
-    const setGetAll = new lambda.Function(this, 'setGetAll', {
-      code: new lambda.AssetCode('src'),
-      handler: 'sets-get-all.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+    const setGetAll = new Function(this, 'setGetAll', {
+      code: new AssetCode('src'),
+      handler: 'set-get-all.handler',
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
     });
 
-    const setGet = new lambda.Function(this, 'setGet', {
-      code: new lambda.AssetCode('src'),
-      handler: 'sets-get.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+    const setGet = new Function(this, 'setGet', {
+      code: new AssetCode('src'),
+      handler: 'set-get.handler',
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
     });
 
-    const setCreate = new lambda.Function(this, 'setCreate', {
-      code: new lambda.AssetCode('src'),
-      handler: 'sets-create.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+    const setCreate = new Function(this, 'setCreate', {
+      code: new AssetCode('src'),
+      handler: 'set-create.handler',
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
     });
 
-    const setUpdate = new lambda.Function(this, 'setUpdate', {
-      code: new lambda.AssetCode('src'),
-      handler: 'sets-update-one.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+    const setUpdate = new Function(this, 'setUpdate', {
+      code: new AssetCode('src'),
+      handler: 'set-update.handler',
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
     });
 
-    const setDelete = new lambda.Function(this, 'setDelete', {
-      code: new lambda.AssetCode('src'),
-      handler: 'sets-delete-one.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+    const setDelete = new Function(this, 'setDelete', {
+      code: new AssetCode('src'),
+      handler: 'set-delete.handler',
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
@@ -81,6 +86,18 @@ export class ApigCrudStack extends Stack {
     dynamoTable.grantReadWriteData(setCreate);
     dynamoTable.grantReadWriteData(setUpdate);
     dynamoTable.grantReadWriteData(setDelete);
+
+    api.root.addMethod('GET', new MockIntegration({
+      integrationResponses: [{
+        statusCode: '200',
+      }],
+      passthroughBehavior: PassthroughBehavior.NEVER,
+      requestTemplates: {
+        'application/json': '{ "statusCode": 200 }',
+      },
+    }), {
+      methodResponses: [{ statusCode: '200' }],
+    });
 
     const setResource = api.root.addResource('sets');
     const setGetAllIntegration = new LambdaIntegration(setGetAll);
@@ -94,53 +111,57 @@ export class ApigCrudStack extends Stack {
     singleSetResource.addMethod('GET', setGetIntegration);
 
     const setUpdateIntegration = new LambdaIntegration(setUpdate);
-    singleSetResource.addMethod('PATCH', setUpdateIntegration);
+    singleSetResource.addMethod('PUT', setUpdateIntegration);
 
     const setDeleteIntegration = new LambdaIntegration(setDelete);
     singleSetResource.addMethod('DELETE', setDeleteIntegration);
 
-
     // flashcard resource
-    const flashcardGetAll = new lambda.Function(this, 'flashcardGetAll', {
-      code: new lambda.AssetCode('src'),
+    const flashcardGetAll = new Function(this, 'flashcardGetAll', {
+      code: new AssetCode('src'),
       handler: 'flashcard-get-all.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
     });
 
-    const flashcardGet = new lambda.Function(this, 'flashcardGet', {
-      code: new lambda.AssetCode('src'),
+    const flashcardGet = new Function(this, 'flashcardGet', {
+      code: new AssetCode('src'),
       handler: 'flashcard-get.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
     });
 
-    const flashcardCreate = new lambda.Function(this, 'flashcardCreate', {
-      code: new lambda.AssetCode('src'),
+    const flashcardCreate = new Function(this, 'flashcardCreate', {
+      code: new AssetCode('src'),
       handler: 'flashcard-create.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
     });
 
-    const flashcardUpdate = new lambda.Function(this, 'flashcardUpdate', {
-      code: new lambda.AssetCode('src'),
-      handler: 'flashcard-update-one.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+    const flashcardUpdate = new Function(this, 'flashcardUpdate', {
+      code: new AssetCode('src'),
+      handler: 'flashcard-update.handler',
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
     });
 
-    const flashcardDelete = new lambda.Function(this, 'flashcardDelete', {
-      code: new lambda.AssetCode('src'),
-      handler: 'flashcard-delete-one.handler',
-      runtime: lambda.Runtime.NODEJS_14_X,
+    const flashcardDelete = new Function(this, 'flashcardDelete', {
+      code: new AssetCode('src'),
+      handler: 'flashcard-delete.handler',
+      timeout: Duration.seconds(15),
+      runtime: Runtime.NODEJS_12_X,
       environment: {
         TABLE_NAME: dynamoTable.tableName
       }
@@ -152,7 +173,7 @@ export class ApigCrudStack extends Stack {
     dynamoTable.grantReadWriteData(flashcardUpdate);
     dynamoTable.grantReadWriteData(flashcardDelete);
 
-    const flashcardResource = setResource.addResource('flashcards');
+    const flashcardResource = singleSetResource.addResource('flashcards');
     const flashcardGetAllIntegration = new LambdaIntegration(flashcardGetAll);
     flashcardResource.addMethod('GET', flashcardGetAllIntegration);
 
@@ -164,38 +185,9 @@ export class ApigCrudStack extends Stack {
     singleFlashcardResource.addMethod('GET', flashcardGetIntegration);
 
     const flashcardUpdateIntegration = new LambdaIntegration(flashcardUpdate);
-    singleFlashcardResource.addMethod('PATCH', flashcardUpdateIntegration);
+    singleFlashcardResource.addMethod('PUT', flashcardUpdateIntegration);
 
     const flashcardDeleteIntegration = new LambdaIntegration(flashcardDelete);
     singleFlashcardResource.addMethod('DELETE', flashcardDeleteIntegration);
   }
-}
-
-
-export function addCorsOptions(apiResource: IResource) {
-  apiResource.addMethod('OPTIONS', new MockIntegration({
-    integrationResponses: [{
-      statusCode: '200',
-      responseParameters: {
-        'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-        'method.response.header.Access-Control-Allow-Origin': "'*'",
-        'method.response.header.Access-Control-Allow-Credentials': "'false'",
-        'method.response.header.Access-Control-Allow-Methods': "'OPTIONS,GET,PUT,POST,DELETE'",
-      },
-    }],
-    passthroughBehavior: PassthroughBehavior.NEVER,
-    requestTemplates: {
-      "application/json": "{\"statusCode\": 200}"
-    },
-  }), {
-    methodResponses: [{
-      statusCode: '200',
-      responseParameters: {
-        'method.response.header.Access-Control-Allow-Headers': true,
-        'method.response.header.Access-Control-Allow-Methods': true,
-        'method.response.header.Access-Control-Allow-Credentials': true,
-        'method.response.header.Access-Control-Allow-Origin': true,
-      },
-    }]
-  })
 }
