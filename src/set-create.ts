@@ -8,9 +8,6 @@ const RESERVED_RESPONSE = `Error: You're using AWS reserved keywords as attribut
     DYNAMODB_EXECUTION_ERROR = `Error: Execution update, caused a Dynamodb error, please take a look at your CloudWatch Logs.`;
 
 export const handler = async (event: any = {}): Promise<any> => {
-    console.log("BOOOOOOO");
-    console.log("event: ", event.body);
-
     if (!event.body) {
         return { statusCode: 400, body: 'invalid request, you are missing the parameter body' };
     }
@@ -33,8 +30,7 @@ export const handler = async (event: any = {}): Promise<any> => {
             name: item.name || "",
             description: item.description || "",
             count: 0,
-            created_on: date.getTime(),
-            flashcards: []
+            created_on: date.getTime()
         }
     };
 
