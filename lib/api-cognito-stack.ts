@@ -1,10 +1,8 @@
-import { LambdaIntegration, RestApi } from '@aws-cdk/aws-apigateway';
+import { LambdaIntegration, RestApi, CfnAuthorizer, PassthroughBehavior, MockIntegration, Cors, IResource } from '@aws-cdk/aws-apigateway';
 import { Construct, Stack, StackProps } from '@aws-cdk/core';
 import { Function } from '@aws-cdk/aws-lambda';
 import { AuthorizationType } from '@aws-cdk/aws-apigateway';
-import { CfnAuthorizer } from '@aws-cdk/aws-apigateway';
-import { Cors, MockIntegration, PassthroughBehavior } from '@aws-cdk/aws-apigateway';
-import { UserPool, OAuthScope, CfnUserPoolResourceServer } from '@aws-cdk/aws-cognito'
+import { UserPool, AccountRecovery } from '@aws-cdk/aws-cognito'
 
 interface Props extends StackProps {
     modelName: string;
@@ -28,40 +26,56 @@ export class ApiCognitoStack extends Stack {
         const api = new RestApi(this, `${props.modelName}-api`, {
             defaultCorsPreflightOptions: {
                 allowOrigins: Cors.ALL_ORIGINS,
+                allowHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token', 'X-Amz-User-Agent', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Headers', 'Access-Control-Allow-Credentials']
             },
-            restApiName: `${props.modelName} Service`,
+            restApiName: `${props.modelName}-service`,
         });
 
         // adding root get method
         api.root.addMethod('GET', new MockIntegration({
             integrationResponses: [{
                 statusCode: '200',
+                responseParameters: {
+                    'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,Access-Control-Allow-Credentials'",
+                    'method.response.header.Access-Control-Allow-Origin': "'*'",
+                    'method.response.header.Access-Control-Allow-Credentials': "'false'",
+                    'method.response.header.Access-Control-Allow-Methods': "'OPTIONS,GET,PUT,POST,DELETE'",
+                },
             }],
             passthroughBehavior: PassthroughBehavior.NEVER,
             requestTemplates: {
-                'application/json': '{ "statusCode": 200 }',
+                "application/json": "{\"statusCode\": 200}"
             },
         }), {
-            methodResponses: [{ statusCode: '200' }],
-        });
+            methodResponses: [{
+                statusCode: '200',
+                responseParameters: {
+                    'method.response.header.Access-Control-Allow-Headers': true,
+                    'method.response.header.Access-Control-Allow-Methods': true,
+                    'method.response.header.Access-Control-Allow-Credentials': true,
+                    'method.response.header.Access-Control-Allow-Origin': true,
+                },
+            }]
+        })
+
 
         // cognito
         const userPool = new UserPool(this, "userPool", {
-            selfSignUpEnabled: true, // Allow users to sign up
-            autoVerify: { email: true }, // Verify email addresses by sending a verification code
-            signInAliases: { email: true }, // Set email as an alias
-
+            accountRecovery: AccountRecovery.EMAIL_ONLY,
+            selfSignUpEnabled: true,
+            autoVerify: { email: true },
+            signInAliases: { email: true, username: true },
+            signInCaseSensitive: false,
         });
 
         userPool.addClient("client", {
-            generateSecret: true,
+            generateSecret: false,
             oAuth: {
                 flows: {
                     authorizationCodeGrant: true,
                 }
             },
         });
-
 
         userPool.addDomain("domain", {
             cognitoDomain: {
@@ -81,12 +95,13 @@ export class ApiCognitoStack extends Stack {
         const setResource = api.root.addResource('sets');
 
         const setGetAllIntegration = new LambdaIntegration(props.setGetAll);
+
         setResource.addMethod('GET', setGetAllIntegration, {
             authorizationType: AuthorizationType.COGNITO,
             authorizer: {
                 authorizerId: authorizer.ref
             }
-        });
+        })
 
         const setCreateIntegration = new LambdaIntegration(props.setCreate);
         setResource.addMethod('POST', setCreateIntegration);

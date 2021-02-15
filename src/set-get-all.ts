@@ -16,7 +16,16 @@ export const handler = async (): Promise<any> => {
 
     try {
         const response = await db.query(params).promise();
-        return { statusCode: 200, body: JSON.stringify(response.Items) };
+
+        return {
+            statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*", // Required for CORS support to work
+                "Access-Control-Allow-Credentials": true // Required for cookies, authorization headers with HTTPS
+            },
+            body: JSON.stringify(response.Items)
+        };
+
     } catch (dbError) {
         return { statusCode: 500, body: JSON.stringify(dbError) };
     }
