@@ -31,34 +31,6 @@ export class ApiCognitoStack extends Stack {
             restApiName: `${props.modelName}-service`,
         });
 
-        // adding root get method
-        api.root.addMethod('GET', new MockIntegration({
-            integrationResponses: [{
-                statusCode: '200',
-                responseParameters: {
-                    'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,Access-Control-Allow-Credentials'",
-                    'method.response.header.Access-Control-Allow-Origin': "'*'",
-                    'method.response.header.Access-Control-Allow-Credentials': "'false'",
-                    'method.response.header.Access-Control-Allow-Methods': "'OPTIONS,GET,PUT,POST,DELETE'",
-                },
-            }],
-            passthroughBehavior: PassthroughBehavior.NEVER,
-            requestTemplates: {
-                "application/json": "{\"statusCode\": 200}"
-            },
-        }), {
-            methodResponses: [{
-                statusCode: '200',
-                responseParameters: {
-                    'method.response.header.Access-Control-Allow-Headers': true,
-                    'method.response.header.Access-Control-Allow-Methods': true,
-                    'method.response.header.Access-Control-Allow-Credentials': true,
-                    'method.response.header.Access-Control-Allow-Origin': true,
-                },
-            }]
-        })
-
-
         // cognito
         const userPool = new UserPool(this, "userPool", {
             accountRecovery: AccountRecovery.EMAIL_ONLY,
@@ -104,35 +76,80 @@ export class ApiCognitoStack extends Stack {
         })
 
         const setCreateIntegration = new LambdaIntegration(props.setCreate);
-        setResource.addMethod('POST', setCreateIntegration);
+        setResource.addMethod('POST', setCreateIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
 
         const singleSetResource = setResource.addResource('{set_id}');
         const setGetIntegration = new LambdaIntegration(props.setGet);
-        singleSetResource.addMethod('GET', setGetIntegration);
+        singleSetResource.addMethod('GET', setGetIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
 
         const setUpdateIntegration = new LambdaIntegration(props.setUpdate);
-        singleSetResource.addMethod('PUT', setUpdateIntegration);
+        singleSetResource.addMethod('PUT', setUpdateIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
 
         const setDeleteIntegration = new LambdaIntegration(props.setDelete);
-        singleSetResource.addMethod('DELETE', setDeleteIntegration);
+        singleSetResource.addMethod('DELETE', setDeleteIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
 
         // flashcards resource
         const flashcardResource = singleSetResource.addResource('flashcards');
 
         const flashcardGetAllIntegration = new LambdaIntegration(props.flashcardGetAll);
-        flashcardResource.addMethod('GET', flashcardGetAllIntegration);
+        flashcardResource.addMethod('GET', flashcardGetAllIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
 
         const flashcardCreateIntegration = new LambdaIntegration(props.flashcardCreate);
-        flashcardResource.addMethod('POST', flashcardCreateIntegration);
+        flashcardResource.addMethod('POST', flashcardCreateIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
 
         const singleFlashcardResource = flashcardResource.addResource('{flashcard_id}');
         const flashcardGetIntegration = new LambdaIntegration(props.flashcardGet);
-        singleFlashcardResource.addMethod('GET', flashcardGetIntegration);
+        singleFlashcardResource.addMethod('GET', flashcardGetIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
 
         const flashcardUpdateIntegration = new LambdaIntegration(props.flashcardUpdate);
-        singleFlashcardResource.addMethod('PUT', flashcardUpdateIntegration);
+        singleFlashcardResource.addMethod('PUT', flashcardUpdateIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
 
         const flashcardDeleteIntegration = new LambdaIntegration(props.flashcardDelete);
-        singleFlashcardResource.addMethod('DELETE', flashcardDeleteIntegration);
+        singleFlashcardResource.addMethod('DELETE', flashcardDeleteIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
     }
 }

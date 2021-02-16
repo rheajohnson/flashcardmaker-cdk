@@ -20,23 +20,22 @@ export const handler = async (event: any = {}): Promise<any> => {
         }
     };
 
-    const getAllFlaschardsParams: any = {
+    const getAllFlashcardParams: any = {
         TableName: TABLE_NAME,
         KeyConditionExpression: 'pk = :pk and begins_with(sk, :sk)',
         ExpressionAttributeValues: {
             ':pk': "sets",
-            ':sk': "metadata#"
+            ':sk': "set#"
         }
     }
     try {
         await db.delete(deleteSetParams).promise();
-        const getAllFlashcardsResponse: Promise<Json> = Promise.resolve<any>(db.query(getAllFlaschardsParams).promise());
-        const getAllFlashcards = JSON.parse(await getAllFlashcardsResponse)
-        for (const item of getAllFlashcards) {
+        const getAllFlashcardsResponse: Promise<Json> = Promise.resolve<any>(db.query(getAllFlashcardParams).promise());
+        const getAllFlashcards: any = await getAllFlashcardsResponse;
+        for (const item of getAllFlashcards.Items) {
             const deleteFlashcardParams: any = {
                 TableName: TABLE_NAME,
-                KeyConditionExpression: 'pk = :pk and sk begins_with :sk',
-                ExpressionAttributeValues: {
+                Key: {
                     ':pk': "sets",
                     ':sk': `set#${requestedItemId}#flashcard#${item.id}`
                 }
@@ -45,6 +44,7 @@ export const handler = async (event: any = {}): Promise<any> => {
         }
         return { statusCode: 200, body: '' };
     } catch (dbError) {
+        console.error(dbError)
         return { statusCode: 500, body: JSON.stringify(dbError) };
     }
 };
