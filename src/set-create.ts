@@ -12,7 +12,6 @@ export const handler = async (event: any = {}): Promise<any> => {
         return { statusCode: 400, body: 'invalid request, you are missing the parameter body' };
     }
     const item = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
-    console.log("item: ", item)
     const requiredFields = ["name", "description"]
     for (const requiredField of requiredFields) {
         if (!(requiredField in item)) {

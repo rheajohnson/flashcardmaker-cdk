@@ -15,7 +15,7 @@ export const handler = async (event: any = {}): Promise<any> => {
         TableName: TABLE_NAME,
         Key: {
             pk: "sets",
-            sk: `set#${requestedSetId}#flashcard${requestedFlashcardId}`,
+            sk: `set#${requestedSetId}#flashcard#${requestedFlashcardId}`,
         }
     };
 

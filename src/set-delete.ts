@@ -1,6 +1,5 @@
 import AWS = require('aws-sdk');
 import { Json } from 'aws-sdk/clients/robomaker';
-import { PromiseResult } from 'aws-sdk/lib/request';
 
 const db = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = process.env.TABLE_NAME || '';
@@ -25,7 +24,7 @@ export const handler = async (event: any = {}): Promise<any> => {
         KeyConditionExpression: 'pk = :pk and begins_with(sk, :sk)',
         ExpressionAttributeValues: {
             ':pk': "sets",
-            ':sk': "set#"
+            ':sk': `set#${requestedItemId}`
         }
     }
     try {
@@ -36,8 +35,8 @@ export const handler = async (event: any = {}): Promise<any> => {
             const deleteFlashcardParams: any = {
                 TableName: TABLE_NAME,
                 Key: {
-                    ':pk': "sets",
-                    ':sk': `set#${requestedItemId}#flashcard#${item.id}`
+                    pk: "sets",
+                    sk: `set#${requestedItemId}#flashcard#${item.id} `
                 }
             }
             await db.delete(deleteFlashcardParams).promise();

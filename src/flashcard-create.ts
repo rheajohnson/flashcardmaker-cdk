@@ -52,7 +52,7 @@ export const handler = async (event: any = {}): Promise<any> => {
     try {
         await db.put(flashcardPutParams).promise();
         await db.update(setPutParams).promise();
-        return { statusCode: 201, body: JSON.stringify({ id: key }) };
+        return { statusCode: 201, body: JSON.stringify(flashcardPutParams.Item) };
     } catch (dbError) {
         console.error(dbError.message)
         const errorResponse = dbError.code === 'ValidationException' && dbError.message.includes('reserved keyword') ?

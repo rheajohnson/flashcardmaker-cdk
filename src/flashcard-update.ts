@@ -36,7 +36,7 @@ export const handler = async (event: any = {}): Promise<any> => {
         TableName: TABLE_NAME,
         Key: {
             pk: `sets`,
-            sk: `set#${requestedSetId}flashcard#${requestedFlashcardId}`
+            sk: `set#${requestedSetId}#flashcard#${requestedFlashcardId}`
         },
         UpdateExpression: `set #${firstProperty} = :${firstProperty}`,
         ExpressionAttributeValues: {},
@@ -53,7 +53,9 @@ export const handler = async (event: any = {}): Promise<any> => {
     });
 
     try {
-        await db.update(params).promise();
+        console.log("PARAMS: ", params)
+        const response = await db.update(params).promise();
+        console.log("RESPONSE: ", response)
         return { statusCode: 204, body: '' };
     } catch (dbError) {
         console.error(dbError.message)
