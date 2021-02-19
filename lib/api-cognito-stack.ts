@@ -16,6 +16,10 @@ interface Props extends StackProps {
     flashcardGet: Function;
     flashcardUpdate: Function;
     flashcardDelete: Function;
+    userCreate: Function;
+    userGet: Function;
+    userUpdate: Function;
+    userDelete: Function;
 }
 
 export class ApiCognitoStack extends Stack {
@@ -85,12 +89,7 @@ export class ApiCognitoStack extends Stack {
 
         const singleSetResource = setResource.addResource('{set_id}');
         const setGetIntegration = new LambdaIntegration(props.setGet);
-        singleSetResource.addMethod('GET', setGetIntegration, {
-            authorizationType: AuthorizationType.COGNITO,
-            authorizer: {
-                authorizerId: authorizer.ref
-            }
-        })
+        singleSetResource.addMethod('GET')
 
         const setUpdateIntegration = new LambdaIntegration(props.setUpdate);
         singleSetResource.addMethod('PUT', setUpdateIntegration, {
@@ -112,12 +111,7 @@ export class ApiCognitoStack extends Stack {
         const flashcardResource = singleSetResource.addResource('flashcards');
 
         const flashcardGetAllIntegration = new LambdaIntegration(props.flashcardGetAll);
-        flashcardResource.addMethod('GET', flashcardGetAllIntegration, {
-            authorizationType: AuthorizationType.COGNITO,
-            authorizer: {
-                authorizerId: authorizer.ref
-            }
-        })
+        flashcardResource.addMethod('GET', flashcardGetAllIntegration)
 
         const flashcardCreateIntegration = new LambdaIntegration(props.flashcardCreate);
         flashcardResource.addMethod('POST', flashcardCreateIntegration, {
@@ -129,12 +123,7 @@ export class ApiCognitoStack extends Stack {
 
         const singleFlashcardResource = flashcardResource.addResource('{flashcard_id}');
         const flashcardGetIntegration = new LambdaIntegration(props.flashcardGet);
-        singleFlashcardResource.addMethod('GET', flashcardGetIntegration, {
-            authorizationType: AuthorizationType.COGNITO,
-            authorizer: {
-                authorizerId: authorizer.ref
-            }
-        })
+        singleFlashcardResource.addMethod('GET', flashcardGetIntegration)
 
         const flashcardUpdateIntegration = new LambdaIntegration(props.flashcardUpdate);
         singleFlashcardResource.addMethod('PUT', flashcardUpdateIntegration, {
@@ -146,6 +135,43 @@ export class ApiCognitoStack extends Stack {
 
         const flashcardDeleteIntegration = new LambdaIntegration(props.flashcardDelete);
         singleFlashcardResource.addMethod('DELETE', flashcardDeleteIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
+
+
+        // users resource
+        const userResource = singleSetResource.addResource('users');
+
+        const userCreateIntegration = new LambdaIntegration(props.userCreate);
+        userResource.addMethod('POST', userCreateIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
+
+        const singleuserResource = userResource.addResource('{user_id}');
+        const userGetIntegration = new LambdaIntegration(props.userGet);
+        singleuserResource.addMethod('GET', userGetIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
+
+        const userUpdateIntegration = new LambdaIntegration(props.userUpdate);
+        singleuserResource.addMethod('PUT', userUpdateIntegration, {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: authorizer.ref
+            }
+        })
+
+        const userDeleteIntegration = new LambdaIntegration(props.userDelete);
+        singleuserResource.addMethod('DELETE', userDeleteIntegration, {
             authorizationType: AuthorizationType.COGNITO,
             authorizer: {
                 authorizerId: authorizer.ref

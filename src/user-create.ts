@@ -12,24 +12,21 @@ export const handler = async (event: any = {}): Promise<any> => {
         return { statusCode: 400, body: 'invalid request, you are missing the parameter body' };
     }
     const item = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
-    const requiredFields = ["name"]
+    const requiredFields = ["email", "id"]
     for (const requiredField of requiredFields) {
         if (!(requiredField in item)) {
             return { statusCode: 400, body: `invalid request, you are missing the body parameter: ${requiredField}` };
         }
     }
-    const key = uuidv4();
     const date = new Date();
     const params = {
         TableName: TABLE_NAME,
         Item: {
-            pk: 'sets',
-            sk: `metadata#set#${key}`,
-            id: key,
-            name: item.name || "",
-            description: item.description || "",
-            count: 0,
-            created_on: date.getTime()
+            pk: 'users',
+            sk: `${event.body.email}`,
+            sets: [],
+            created_on: date.getTime(),
+            id: `${event.body.email}`
         }
     };
 

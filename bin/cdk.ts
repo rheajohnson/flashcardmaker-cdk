@@ -23,4 +23,8 @@ new ApiCognitoStack(app, `${modelName}-api-cognito-stack`, {
     flashcardGet: lambdaStack.flashcardGet,
     flashcardUpdate: lambdaStack.flashcardUpdate,
     flashcardDelete: lambdaStack.flashcardDelete,
+    userCreate: lambdaStack.userCreate,
+    userGet: lambdaStack.userGet,
+    userUpdate: lambdaStack.userUpdate,
+    userDelete: lambdaStack.userDelete,
 });

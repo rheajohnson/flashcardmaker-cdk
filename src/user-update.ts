@@ -13,15 +13,14 @@ export const handler = async (event: any = {}): Promise<any> => {
         return { statusCode: 400, body: 'invalid request, you are missing the parameter body' };
     }
 
-    const requestedSetId = event.pathParameters.set_id;
-    const requestedFlashcardId = event.pathParameters.flashcard_id;
-    if (!requestedSetId || !requestedFlashcardId) {
-        return { statusCode: 400, body: `Error: You are missing the path parameter id` };
+    const editedItemId = event.pathParameters.email;
+    if (!editedItemId) {
+        return { statusCode: 400, body: 'invalid request, you are missing the path parameter id' };
     }
 
     const editedItem: any = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
     const editedItemProperties = Object.keys(editedItem);
-    const allowedProperties = ["front", "back"]
+    const allowedProperties = ["sets"]
     const editedItemPropertiesFiltered: Array<string> = editedItemProperties.filter(editedItemProperty => allowedProperties.includes(editedItemProperty))
     if (!editedItem || editedItemProperties.length < 1 || editedItemPropertiesFiltered.length < 1) {
         return { statusCode: 400, body: 'invalid request, no arguments provided' };
@@ -35,8 +34,8 @@ export const handler = async (event: any = {}): Promise<any> => {
     const params: any = {
         TableName: TABLE_NAME,
         Key: {
-            pk: `sets`,
-            sk: `set#${requestedSetId}#flashcard#${requestedFlashcardId}`
+            pk: `users`,
+            sk: `${editedItemId}`,
         },
         UpdateExpression: `set #${firstProperty} = :${firstProperty}`,
         ExpressionAttributeValues: {},
