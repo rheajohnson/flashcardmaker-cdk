@@ -13,7 +13,7 @@ export const handler = async (event: any = {}): Promise<any> => {
         return { statusCode: 400, body: 'invalid request, you are missing the parameter body' };
     }
 
-    const editedItemId = event.pathParameters.email;
+    const editedItemId = event.pathParameters.user_id;
     if (!editedItemId) {
         return { statusCode: 400, body: 'invalid request, you are missing the path parameter id' };
     }
@@ -35,7 +35,7 @@ export const handler = async (event: any = {}): Promise<any> => {
         TableName: TABLE_NAME,
         Key: {
             pk: `users`,
-            sk: `${editedItemId}`,
+            sk: `user#${editedItemId}`,
         },
         UpdateExpression: `set #${firstProperty} = :${firstProperty}`,
         ExpressionAttributeValues: {},

@@ -20,7 +20,7 @@ export const handler = async (event: any = {}): Promise<any> => {
 
     const editedItem: any = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
     const editedItemProperties = Object.keys(editedItem);
-    const allowedProperties = ["name", "description"]
+    const allowedProperties = ["name", "item_type"]
     const editedItemPropertiesFiltered: Array<string> = editedItemProperties.filter(editedItemProperty => allowedProperties.includes(editedItemProperty))
     if (!editedItem || editedItemProperties.length < 1 || editedItemPropertiesFiltered.length < 1) {
         return { statusCode: 400, body: 'invalid request, no arguments provided' };

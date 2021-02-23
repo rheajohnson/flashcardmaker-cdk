@@ -14,7 +14,7 @@ export const handler = async (event: any = {}): Promise<any> => {
     const item = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
     const requiredFields = ["name"]
     for (const requiredField of requiredFields) {
-        if (!(requiredField in item)) {
+        if (!(requiredField in item) || !item[requiredField].length) {
             return { statusCode: 400, body: `invalid request, you are missing the body parameter: ${requiredField}` };
         }
     }
@@ -27,7 +27,7 @@ export const handler = async (event: any = {}): Promise<any> => {
             sk: `metadata#set#${key}`,
             id: key,
             name: item.name || "",
-            description: item.description || "",
+            item_type: `type#${item.type || "private"}#set#${key}`,
             count: 0,
             created_on: date.getTime()
         }

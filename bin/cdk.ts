@@ -26,5 +26,4 @@ new ApiCognitoStack(app, `${modelName}-api-cognito-stack`, {
     userCreate: lambdaStack.userCreate,
     userGet: lambdaStack.userGet,
     userUpdate: lambdaStack.userUpdate,
-    userDelete: lambdaStack.userDelete,
 });

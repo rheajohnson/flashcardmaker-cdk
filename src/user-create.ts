@@ -1,5 +1,4 @@
 import AWS = require('aws-sdk');
-import { v4 as uuidv4 } from 'uuid';
 
 const db = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = process.env.TABLE_NAME || '';
@@ -12,7 +11,7 @@ export const handler = async (event: any = {}): Promise<any> => {
         return { statusCode: 400, body: 'invalid request, you are missing the parameter body' };
     }
     const item = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
-    const requiredFields = ["email", "id"]
+    const requiredFields = ["email", "id", "username"]
     for (const requiredField of requiredFields) {
         if (!(requiredField in item)) {
             return { statusCode: 400, body: `invalid request, you are missing the body parameter: ${requiredField}` };
@@ -23,10 +22,12 @@ export const handler = async (event: any = {}): Promise<any> => {
         TableName: TABLE_NAME,
         Item: {
             pk: 'users',
-            sk: `${event.body.email}`,
+            sk: `user#${item.id}`,
             sets: [],
+            userRole: "user",
+            email: item.email,
+            username: item.username,
             created_on: date.getTime(),
-            id: `${event.body.email}`
         }
     };
 

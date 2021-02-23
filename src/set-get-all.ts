@@ -7,11 +7,12 @@ export const handler = async (): Promise<any> => {
 
     const params: any = {
         TableName: TABLE_NAME,
-        KeyConditionExpression: 'pk = :pk and begins_with(sk, :sk)',
+        KeyConditionExpression: 'pk = :pk and begins_with(item_type, :item_type)',
         ExpressionAttributeValues: {
             ':pk': "sets",
-            ':sk': "metadata#"
-        }
+            ':item_type': "type#public#set",
+        },
+        IndexName: "item_type"
     }
 
     try {
@@ -20,7 +21,7 @@ export const handler = async (): Promise<any> => {
         return {
             statusCode: 200,
             headers: {
-                "Access-Control-Allow-Origin": "*", // Required for CORS support to work
+                "Access-Control-Allow-Origin": "*",
             },
             body: JSON.stringify(response.Items)
         };

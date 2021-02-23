@@ -20,7 +20,6 @@ export class LambdaStack extends Stack {
     public readonly userCreate: Function;
     public readonly userGet: Function;
     public readonly userUpdate: Function;
-    public readonly userDelete: Function;
 
     constructor(scope: Construct, id: string, props: Props) {
         super(scope, id, props);
@@ -158,16 +157,6 @@ export class LambdaStack extends Stack {
             }
         });
 
-        const userDelete = new Function(this, 'userDelete', {
-            code: new AssetCode('src'),
-            handler: 'user-delete.handler',
-            timeout: Duration.seconds(15),
-            runtime: Runtime.NODEJS_12_X,
-            environment: {
-                TABLE_NAME: props.dynamoTable.tableName
-            }
-        });
-
         // granting permissions for all lambdas
         props.dynamoTable.grantReadWriteData(setGetAll);
         props.dynamoTable.grantReadWriteData(setCreate);
@@ -182,7 +171,6 @@ export class LambdaStack extends Stack {
         props.dynamoTable.grantReadWriteData(userCreate);
         props.dynamoTable.grantReadWriteData(userGet);
         props.dynamoTable.grantReadWriteData(userUpdate);
-        props.dynamoTable.grantReadWriteData(userDelete);
 
         // sharing between stacks
         this.setGetAll = setGetAll;
@@ -198,6 +186,5 @@ export class LambdaStack extends Stack {
         this.userCreate = userCreate;
         this.userGet = userGet;
         this.userUpdate = userUpdate;
-        this.userDelete = userDelete;
     }
 }

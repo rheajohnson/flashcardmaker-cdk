@@ -2,7 +2,7 @@ import { LambdaIntegration, RestApi, CfnAuthorizer, PassthroughBehavior, MockInt
 import { Construct, Stack, StackProps } from '@aws-cdk/core';
 import { Function } from '@aws-cdk/aws-lambda';
 import { AuthorizationType } from '@aws-cdk/aws-apigateway';
-import { UserPool, AccountRecovery } from '@aws-cdk/aws-cognito'
+import { UserPool, VerificationEmailStyle } from '@aws-cdk/aws-cognito'
 
 interface Props extends StackProps {
     modelName: string;
@@ -19,7 +19,6 @@ interface Props extends StackProps {
     userCreate: Function;
     userGet: Function;
     userUpdate: Function;
-    userDelete: Function;
 }
 
 export class ApiCognitoStack extends Stack {
@@ -37,7 +36,7 @@ export class ApiCognitoStack extends Stack {
 
         // cognito
         const userPool = new UserPool(this, "userPool", {
-            accountRecovery: AccountRecovery.EMAIL_ONLY,
+            userVerification: { emailStyle: VerificationEmailStyle.LINK, emailSubject: "Confirm email for Flashcard Maker" },
             selfSignUpEnabled: true,
             autoVerify: { email: true },
             signInAliases: { email: true, username: true },
@@ -72,12 +71,7 @@ export class ApiCognitoStack extends Stack {
 
         const setGetAllIntegration = new LambdaIntegration(props.setGetAll);
 
-        setResource.addMethod('GET', setGetAllIntegration, {
-            authorizationType: AuthorizationType.COGNITO,
-            authorizer: {
-                authorizerId: authorizer.ref
-            }
-        })
+        setResource.addMethod('GET', setGetAllIntegration);
 
         const setCreateIntegration = new LambdaIntegration(props.setCreate);
         setResource.addMethod('POST', setCreateIntegration, {
@@ -89,7 +83,7 @@ export class ApiCognitoStack extends Stack {
 
         const singleSetResource = setResource.addResource('{set_id}');
         const setGetIntegration = new LambdaIntegration(props.setGet);
-        singleSetResource.addMethod('GET')
+        singleSetResource.addMethod('GET', setGetIntegration)
 
         const setUpdateIntegration = new LambdaIntegration(props.setUpdate);
         singleSetResource.addMethod('PUT', setUpdateIntegration, {
@@ -143,7 +137,7 @@ export class ApiCognitoStack extends Stack {
 
 
         // users resource
-        const userResource = singleSetResource.addResource('users');
+        const userResource = api.root.addResource('users');
 
         const userCreateIntegration = new LambdaIntegration(props.userCreate);
         userResource.addMethod('POST', userCreateIntegration, {
@@ -164,14 +158,6 @@ export class ApiCognitoStack extends Stack {
 
         const userUpdateIntegration = new LambdaIntegration(props.userUpdate);
         singleuserResource.addMethod('PUT', userUpdateIntegration, {
-            authorizationType: AuthorizationType.COGNITO,
-            authorizer: {
-                authorizerId: authorizer.ref
-            }
-        })
-
-        const userDeleteIntegration = new LambdaIntegration(props.userDelete);
-        singleuserResource.addMethod('DELETE', userDeleteIntegration, {
             authorizationType: AuthorizationType.COGNITO,
             authorizer: {
                 authorizerId: authorizer.ref

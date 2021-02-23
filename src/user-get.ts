@@ -5,7 +5,7 @@ const TABLE_NAME = process.env.TABLE_NAME || '';
 
 export const handler = async (event: any = {}): Promise<any> => {
 
-    const requestedItemId = event.pathParameters.email;
+    const requestedItemId = event.pathParameters.user_id;
     if (!requestedItemId) {
         return { statusCode: 400, body: `Error: You are missing the path parameter id` };
     }
@@ -14,7 +14,7 @@ export const handler = async (event: any = {}): Promise<any> => {
         TableName: TABLE_NAME,
         Key: {
             pk: `users`,
-            sk: `${requestedItemId}`
+            sk: `user#${requestedItemId}`,
         }
     }
 

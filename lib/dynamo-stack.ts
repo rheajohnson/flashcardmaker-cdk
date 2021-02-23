@@ -1,5 +1,6 @@
 import { AttributeType, Table, BillingMode } from '@aws-cdk/aws-dynamodb';
 import { Construct, RemovalPolicy, Stack, StackProps } from '@aws-cdk/core';
+import { DynamoDB } from 'aws-sdk';
 
 interface Props extends StackProps {
     modelName: string;
@@ -24,6 +25,12 @@ export class DynamoStack extends Stack {
             removalPolicy: RemovalPolicy.DESTROY,
             tableName: props.modelName,
         });
+
+        dynamoTable.addLocalSecondaryIndex({
+            indexName: "item_type", sortKey: {
+                name: "item_type", type: AttributeType.STRING,
+            }
+        })
 
         // sharing between stacks
         this.dynamoTable = dynamoTable;
