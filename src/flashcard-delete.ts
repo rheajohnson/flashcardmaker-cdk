@@ -34,8 +34,20 @@ export const handler = async (event: any = {}): Promise<any> => {
     try {
         await db.delete(flashcardDeleteParams).promise();
         await db.update(setPutParams).promise();
-        return { statusCode: 200, body: '' };
+        return {
+            statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: ''
+        };
     } catch (dbError) {
-        return { statusCode: 500, body: JSON.stringify(dbError) };
+        return {
+            statusCode: 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify(dbError)
+        };
     }
 };

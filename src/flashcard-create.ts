@@ -52,11 +52,24 @@ export const handler = async (event: any = {}): Promise<any> => {
     try {
         await db.put(flashcardPutParams).promise();
         await db.update(setPutParams).promise();
-        return { statusCode: 201, body: JSON.stringify(flashcardPutParams.Item) };
+
+        return {
+            statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify(flashcardPutParams.Item)
+        };
     } catch (dbError) {
         console.error(dbError.message)
         const errorResponse = dbError.code === 'ValidationException' && dbError.message.includes('reserved keyword') ?
             DYNAMODB_EXECUTION_ERROR : RESERVED_RESPONSE;
-        return { statusCode: 500, body: errorResponse };
+        return {
+            statusCode: 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: errorResponse
+        };
     }
 };

@@ -27,6 +27,12 @@ export const handler = async (): Promise<any> => {
         };
 
     } catch (dbError) {
-        return { statusCode: 500, body: JSON.stringify(dbError) };
+        return {
+            statusCode: 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify(dbError)
+        };
     }
 };

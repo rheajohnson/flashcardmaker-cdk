@@ -33,11 +33,23 @@ export const handler = async (event: any = {}): Promise<any> => {
 
     try {
         await db.put(params).promise();
-        return { statusCode: 201, body: JSON.stringify({ ...params.Item }) };
+        return {
+            statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({ ...params.Item })
+        };
     } catch (dbError) {
         console.error(dbError)
         const errorResponse = dbError.code === 'ValidationException' && dbError.message.includes('reserved keyword') ?
             DYNAMODB_EXECUTION_ERROR : RESERVED_RESPONSE;
-        return { statusCode: 500, body: errorResponse };
+        return {
+            statusCode: 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: errorResponse
+        };
     }
 };
