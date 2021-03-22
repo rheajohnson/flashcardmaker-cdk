@@ -15,7 +15,7 @@ export const handler = async (event: any = {}): Promise<any> => {
         return { statusCode: 400, body: 'invalid request, you are missing the parameter body' };
     }
     const item = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
-    const requiredFields = ["front", "back"]
+    const requiredFields = ["term", "definition"]
     for (const requiredField of requiredFields) {
         if (!(requiredField in item)) {
             return { statusCode: 400, body: `invalid request, you are missing the body parameter ${requiredField}` };
@@ -28,8 +28,8 @@ export const handler = async (event: any = {}): Promise<any> => {
         Item: {
             pk: 'sets',
             sk: `set#${requestedSetId}#flashcard#${key}`,
-            front: item.front || "",
-            back: item.back || "",
+            term: item.term || "",
+            definition: item.definition || "",
             id: key,
             created_on: date.getTime()
         }
